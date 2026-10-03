@@ -1,39 +1,25 @@
-# -----------------------------------------------------------------------------
-# Import Libraries
-# -----------------------------------------------------------------------------
-
 import numpy as np
 
-# -----------------------------------------------------------------------------
-# Define functions
-# -----------------------------------------------------------------------------
-
-
-def _sigmoid(z):
-    """Numerically stable sigmoid implementation."""
+def _sigmoid(z: np.ndarray) -> np.ndarray:
+    """
+    Returns elementwise sigmoid values.
+    """
     return np.where(z >= 0, 1/(1+np.exp(-z)), np.exp(z)/(1+np.exp(z)))
 
-def train_logistic_regression(X, y, lr=0.1, steps=1000):
+def train_logistic_regression(X: np.ndarray, y: np.ndarray, lr: float = 0.1, steps: int = 1000) -> tuple[np.ndarray, float]:
     """
-    Train logistic regression via gradient descent.
-    Return (w, b).
+    Returns the trained weights and bias as (w, b).
     """
-    
-    N = X.shape[0]
-    
-    # Initialize weights and biases to be 0
-    
-    w = np.zeros(X.shape[1])
-    b = 0
-    
-    # Training loop for n = steps
-    
-    for step in range(steps):
-        logit = X @ w + b
-        y_hat = _sigmoid(logit)
-        w += lr * ((1/N) * (X.T @ (y - y_hat)))
-        b += lr * (np.mean(y - y_hat))
-    
-    
-    return (w,b)
-    
+
+    m, n = X.shape
+    w = np.zeros(n)
+    b = 0.0
+
+    for _ in range(steps):
+        error = _sigmoid(X @ w + b) - y   # dL/dz, shape (m,)
+        grad_w = X.T @ error / m          # shape (n,)
+        grad_b = error.mean()
+        w -= lr * grad_w
+        b -= lr * grad_b
+
+    return w, b
